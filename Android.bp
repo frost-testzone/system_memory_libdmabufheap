@@ -19,10 +19,16 @@ package {
 }
 
 cc_library {
-    srcs: [
-        "BufferAllocator.cpp",
-        "BufferAllocatorWrapper.cpp",
-    ],
+    srcs: select(soong_config_variable("libion", "legacy_impl"), {
+        true: [
+            "BufferAllocator_legacy.cpp",
+            "BufferAllocatorWrapper_legacy.cpp",
+        ],
+        default: [
+            "BufferAllocator.cpp",
+            "BufferAllocatorWrapper.cpp",
+        ],
+    }),
     name: "libdmabufheap",
     recovery_available: true,
     vendor_available: true,
@@ -39,19 +45,27 @@ cc_library {
         "-Wall",
         "-Werror",
     ],
-    local_include_dirs: [
-        "include",
-    ],
-    export_include_dirs: [
-        "include",
-    ],
-    static_libs: [
+    local_include_dirs: select(soong_config_variable("libion", "legacy_impl"), {
+        true: ["include_legacy"],
+        default: ["include"],
+    }),
+    export_include_dirs: select(soong_config_variable("libion", "legacy_impl"), {
+        true: ["include_legacy"],
+        default: ["include"],
+    }),
+    static_libs: select(soong_config_variable("libion", "legacy_impl"), {
+        true: ["libion"],
+        default: [],
+    }) + [
         "libbase",
     ],
     shared_libs: [
         "liblog",
     ],
-    export_static_lib_headers: [
+    export_static_lib_headers: select(soong_config_variable("libion", "legacy_impl"), {
+        true: ["libion"],
+        default: [],
+    }) + [
         "libbase",
     ],
 }
